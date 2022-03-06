@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pembayaran Siswa</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+        <div class="container-fluid">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a class="nav-link active" href="">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../MID/Siswa.html">Tabel Siswa</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../MID/Admin.html">Tabel Admin</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../MID/Pembayaran_admin.html">Pembayaran(Admin)</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="../MID/Pembayaran_siswa.html">Pembayaran(Siswa)</a>
+                </li>
+            </ul>
+        </div>
+      </nav>
+    <div id="app">
+        <div class = "container">
+            <div class="py-5 text-center">
+                <h2>Pembayaran</h2>
+                <h5>Halo,{{ id_siswa }}</h5>
+                <h5>Pembayaran Spp pada:</h5>
+            </div>
+            <div v-if="message" class="alert alert-success" role="alert">
+                {{ message }}
+            </div>
+        <div class="mb-3">
+            <label for="id_siswa" class="form-label">ID Siswa</label>
+            <input v-model="id_siswa" type="text" class="form-control" id="id_siswa" placeholder="ID Siswa">
+            <div class="invalid-feedback" style="width: 100%;">
+                Masukan ID siswa yang benar.
+            </div>
+        </div>
+            <div class="mb-3">
+                <label for="tgl_bayar" class="from-label">Bulan: </label>
+                <select v-model="tgl_bayar" class="form-select" id="tgl_bayar" name="tgl">
+                    <option value="Januari">Januari</option>
+                    <option value="Februari">Februari</option>
+                    <option value="Maret">Maret</option>
+                    <option value="April">April</option>
+                    <option value="Mei">Mei</option>
+                    <option value="Juni">Juni</option>
+                    <option value="Juli">Juli</option>
+                    <option value="Agustus">Agustus</option>
+                    <option value="September">September</option>
+                    <option value="Oktober">Oktober</option>
+                    <option value="November">November</option>
+                    <option value="Desember">Desember</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label for="jmlh_bayar" class="form-label">Nominal yang akan dibayar: </label>
+                <div class="input-group">
+                    <input v-model="jmlh_bayar" type="text" class="form-control" id="jmlh_bayar" placeholder="" required>
+                    <div class="invalid-feedback" style="width: 100%;">
+                    Masukan Nomimal yang akan dibayar.
+                    </div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="id_admin" class="form-label">ID Admin:</label>
+                <div class="input-group">
+                    <input v-model="id_admin" type="text" class="form-control" id="id_admin" placeholder="" required>
+                    <div class="invalid-feedback" style="width: 100%;">
+                        ID Admin diperlukan.
+                    </div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="keterangan" class="form-label">Keterangan:</label>
+                <select v-model="keterangan" class="form-select" id="keterangan" name="keterangan">
+                    <option value="Lunas">Lunas</option>
+                    <option value="Belum Lunas">Belum Lunas</option>
+                </select>
+            </div>
+            <hr class="mb-4">
+            <button v-if="!editMode && !deleteMode" v-on:click="createPembayaran" class="btn btn-primary btn-sm" type="submit" >Simpan Data</button>
+            <button v-if="editMode" v-on:click="updatePembayaran" class="btn btn-info btn-sm" type="submit">Simpan Data</button>
+            <button v-if="deleteMode" v-on:click="deletePembayaran" class="btn btn-danger btn-sm" type="submit">Hapus Data</button>      
+        </div>
+    </div>
+    
+    <!--Axios-->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script>
+        var app = new Vue ({
+            el: '#app',
+            data: {
+                tblpembayaran: [],
+                errors: [],
+                message: null,
+                id_pembayaranEdit: null,
+                id_pembayaranDelete: null,
+                editMode: false,
+                deleteMode: false,
+                id_siswa: '',
+                tgl_bayar: '',
+                jmlh_bayar: '',
+                id_admin: '',
+                keterangan:'',
+            },
+            mounted :function(){
+                this.getPembayaran();
+            },
+            methods : {
+                getPembayaran (){
+                    axios.get ('https://621f095c311a705914fe442c.mockapi.io/tblpembayaran')
+                    .then (response => {
+                        this.tblpembayaran = response.data;
+                        console.log(response);
+                    })
+                    .catch(error => {
+                        console.log(error);
+                    });
+                },
+                createPembayaran : function() {
+                    axios.post('https://621f095c311a705914fe442c.mockapi.io/tblpembayaran',{
+                        tgl_bayar: this.tgl_bayar,
+                        jmlh_bayar: this.jmlh_bayar,
+                        id_admin: this.id_admin,
+                        keterangan: this.keterangan,
+                        id_siswa: this.id_siswa,
+                        keterangan: this.keterangan
+                    })
+                    .then(response => {
+                        this.getPembayaran();
+                        this.resetForm();
+                        console.log(this.tblpembayaran);
+                        this.message = "Pembayaran Berhasil!";
+                    })
+                    .catch(response => {
+                        console.log(err);
+                    });
+                },
+                resetForm: function(){
+                    this.message = null;
+                    this.editMode = false;
+                    this.deleteMode = false;
+                    this.id_pembayaranEdit = null;
+                    this.id_siswa = null;
+                    this.tgl_bayar = null;
+                    this.jmlh_bayar = null;
+                    this.id_admin = null;
+                    this.keterangan = null;
+                },
+                // getEdit: function(pembayaran){
+                //     this.message = null;
+                //     this.editMode = true;
+                //     this.deleteMode = false;
+                //     this.id_pembayaranEdit = pembayaran.id_pembayaran;
+                //     this.id_siswa = pembayaran.id_siswa;
+                //     this.tgl_bayar = pembayaran.tgl_bayar;
+                //     this.jmlh_bayar = pembayaran.jmlh_bayar;
+                //     this.id_admin = pembayaran.id_admin;
+                //     this.keterangan = pembayaran.keterangan;
+                // },
+                // getDelete: function(pembayaran){
+                //     this.message = null;
+                //     this.deleteMode = true;
+                //     this.editMode = false;
+                //     this.id_pembayaranDelete = pembayaran.id_pembayaran;
+                //     this.id_siswa = pembayaran.id_siswa;
+                //     this.tgl_bayar = pembayaran.tgl_bayar;
+                //     this.jmlh_bayar = pembayaran.jmlh_bayar;
+                //     this.id_admin = pembayaran.id_admin;
+                //     this.keterangan = pembayaran.keterangan;
+                // },
+                // updatePembayaran : function() {
+                //     axios.put(`https://621f095c311a705914fe442c.mockapi.io/tblpembayaran/${this.id_pembayaranEdit}`,{
+                //         tgl_bayar: this.tgl_bayar,
+                //         jmlh_bayar: this.jmlh_bayar,
+                //         id_admin: this.id_admin,
+                //         keterangan: this.keterangan,
+                //         id_siswa: this.id_siswa,
+                //         keterangan: this.keterangan,
+                //     })
+                //     .then(res => {
+                //     //success
+                //         this.getPembayaran();
+                //         this.resetForm();
+                //         this.message = "Data telah diperbaharui";
+                //     })
+                //     .catch(res => {
+                //     //error
+                //         console.log(err)
+                //     })
+                // },
+                // deletePembayaran : function(){
+                //     axios.delete(`https://621f095c311a705914fe442c.mockapi.io/tblpembayaran/${this.id_pembayaranDelete}`)
+                //     .then(res => {
+                //         //success
+                //         this.getPembayaran();
+                //         this.resetForm();
+                //         this.message = "Data berhasil dihapus";
+                //     })
+                //     .catch(err => {
+                //         //error
+                //         console.log(err);
+                //     })
+                // }
+            }
+
+        })
+    </script>
+</body>
+</html>
